@@ -1,4 +1,4 @@
-const {app, BrowserWindow, ipcMain, globalShortcut} = require("electron");
+const {app, BrowserWindow, ipcMain, Menu} = require("electron");
 const path = require("path");
 const argv = require("yargs")(process.argv.slice(1))
 	.default("url", "google.com")
@@ -9,6 +9,149 @@ const argv = require("yargs")(process.argv.slice(1))
 	})
 	.argv;
 console.log(process.argv.slice(1));
+
+
+const template = [
+	{
+		label: "File",
+		submenu: [
+			{role: "quit"},
+		],
+	},
+	{
+		label: "Browser",
+		submenu: [
+			{
+				label: "Enter URL",
+				accelerator: "CommandOrControl+L",
+				click: () => openUrlWindow(),
+			}, {
+				label: "Close URL",
+				visible: false,
+				accelerator: "Esc",
+				click: () => urlWindow && urlWindow.close(),
+			},
+			{
+				label: "Reload",
+				accelerator: "F5",
+				click: () => {
+					mainWindow && mainWindow.webContents.reload();
+				},
+			},
+			{
+				label: "Back",
+				accelerator: "Alt+Left",
+				click: () => {
+					mainWindow && mainWindow.webContents.canGoBack() && mainWindow.webContents.goBack();
+				},
+			},
+			{
+				label: "Forward",
+				accelerator: "Alt+Right",
+				click: () => {
+					mainWindow && mainWindow.webContents.canGoForward() && mainWindow.webContents.goForward();
+				},
+			},
+
+
+		],
+	},
+	{
+		label: "View",
+		submenu: [
+			{role: "reload"},
+			{role: "forcereload"},
+			{role: "toggledevtools"},
+			{type: "separator"},
+			{role: "resetzoom"},
+			{role: "zoomin"},
+			{role: "zoomout"},
+			{type: "separator"},
+			{role: "togglefullscreen"},
+		],
+	},
+	{
+		label: "Window",
+		submenu: [
+			{
+				label: "Move right",
+				accelerator: "CommandOrControl+Shift+Right",
+				click: () => {
+					mainWindow && mainWindow.setPosition(mainWindow.getPosition()[0] + 5, mainWindow.getPosition()[1]);
+				},
+			},
+
+			{
+				label: "Move left",
+				accelerator: "CmdOrCtrl+Shift+Left",
+				click: () => {
+					mainWindow && mainWindow.setPosition(mainWindow.getPosition()[0] - 5, mainWindow.getPosition()[1]);
+				},
+			},
+
+			{
+				label: "Move up",
+				accelerator: "CmdOrCtrl+Shift+Up",
+				click: () => {
+					mainWindow && mainWindow.setPosition(mainWindow.getPosition()[0], mainWindow.getPosition()[1] - 5);
+				},
+			},
+			{
+				label: "Move down",
+				accelerator: "CmdOrCtrl+Shift+Down",
+				click: () => {
+					mainWindow && mainWindow.setPosition(mainWindow.getPosition()[0], mainWindow.getPosition()[1] + 5);
+				},
+			},
+			{
+				label: "Opacity +",
+				accelerator: "CmdOrCtrl+Alt+Up",
+				click: () => {
+					const opacity = mainWindow.getOpacity();
+					const newOpacity = opacity + .05;
+					if (newOpacity <= 1) {
+						mainWindow && mainWindow.setOpacity(newOpacity);
+					}
+				},
+			},
+			{
+				label: "Opacity -",
+				accelerator: "CmdOrCtrl+Alt+Down",
+				click: () => {
+					const opacity = mainWindow.getOpacity();
+					const newOpacity = opacity - .05;
+					if (newOpacity >= 0) {
+						mainWindow && mainWindow.setOpacity(newOpacity);
+					}
+				},
+			},
+			{
+				label: "Toggle AlwaysOnTop",
+				accelerator: "CmdOrCtrl+Shift+A",
+				click: () => {
+					mainWindow && mainWindow.setAlwaysOnTop(!mainWindow.isAlwaysOnTop());
+				},
+			},
+			{role: "minimize"},
+			{role: "zoom"},
+			{role: "close"},
+		],
+	},
+	{
+		role: "help",
+		submenu: [
+			{
+				label: "Learn More",
+				click: async () => {
+					const {shell} = require("electron");
+					await shell.openExternal("https://github.com/7aske/boat");
+				},
+			},
+		],
+	},
+];
+
+const menu = Menu.buildFromTemplate(template);
 
 let mainWindow = null;
 let urlWindow = null;
@@ -30,67 +173,6 @@ async function main() {
 		webPreferences: {nodeIntegration: true},
 	});
 
-	globalShortcut.register("CmdOrCtrl+Alt+Up", () => {
-		const opacity = mainWindow.getOpacity();
-		const newOpacity = opacity + .05;
-		if (newOpacity <= 1) {
-			mainWindow && mainWindow.setOpacity(newOpacity);
-		}
-	});
-	globalShortcut.register("CmdOrCtrl+Alt+Down", () => {
-		const opacity = mainWindow.getOpacity();
-		const newOpacity = opacity - .05;
-		if (newOpacity >= 0) {
-			mainWindow && mainWindow.setOpacity(newOpacity);
-		}
-	});
-	globalShortcut.register("CmdOrCtrl+Shift+A", () => {
-		mainWindow && mainWindow.setAlwaysOnTop(!mainWindow.isAlwaysOnTop());
-	});
-	globalShortcut.register("CmdOrCtrl+Shift+I", () => {
-		BrowserWindow.getFocusedWindow().webContents.openDevTools();
-	});
-	globalShortcut.register("F5", () => {
-		mainWindow && mainWindow.webContents.reload();
-	});
-	globalShortcut.register("F10", () => {
-		mainWindow.hide;
-	});
-	globalShortcut.register("F11", () => {
-		mainWindow && mainWindow.setFullScreen(!mainWindow.isFullScreen());
-	});
-	globalShortcut.register("Alt+Left", () => {
-		mainWindow && mainWindow.webContents.canGoBack() && mainWindow.webContents.goBack();
-	});
-	globalShortcut.register("Alt+Right", () => {
-		mainWindow && mainWindow.webContents.canGoForward() && mainWindow.webContents.goForward();
-	});
-
-
-	globalShortcut.register("CmdOrCtrl+Shift+Right", () => {
-		mainWindow && mainWindow.setPosition(mainWindow.getPosition()[0] + 5, mainWindow.getPosition()[1]);
-	});
-
-	globalShortcut.register("CmdOrCtrl+Shift+Left", () => {
-		mainWindow && mainWindow.setPosition(mainWindow.getPosition()[0] - 5, mainWindow.getPosition()[1]);
-	});
-
-	globalShortcut.register("CmdOrCtrl+Shift+Up", () => {
-		console.log(mainWindow.getPosition());
-		mainWindow && mainWindow.setPosition(mainWindow.getPosition()[0], mainWindow.getPosition()[1] - 5);
-	});
-
-	globalShortcut.register("CmdOrCtrl+Shift+Down", () => {
-		mainWindow && mainWindow.setPosition(mainWindow.getPosition()[0], mainWindow.getPosition()[1] + 5);
-	});
-
-
-	globalShortcut.register("Escape", () => {
-		urlWindow && urlWindow.close();
-	});
-	globalShortcut.register("CmdOrCtrl+L", () => {
-		!urlWindow && openUrlWindow();
-	});
 	mainWindow.on("move", () => {
 		if (urlWindow) {
 			urlWindow.setPosition(mainWindow.getBounds().x, mainWindow.getBounds().y);
@@ -113,7 +195,7 @@ async function main() {
 		mainWindow && await openUrlWindow();
 	}
 	mainWindow.show();
-	mainWindow.setMenu(null);
+	mainWindow.setMenu(menu);
 }
 
 ipcMain.on("page-ctl", (event, args) => {
@@ -143,13 +225,15 @@ ipcMain.on("url-open", async (event, args) => {
 });
 
 async function openUrlWindow() {
+	if (urlWindow) {
+		return;
+	}
 	const bounds = mainWindow.getBounds();
 	urlWindow = new BrowserWindow({
 		height: 50,
 		width: bounds.width,
 		x: bounds.x,
 		y: bounds.y,
-		// resizable: false,
 		movable: false,
 		alwaysOnTop: true,
 		autoHideMenuBar: true,
