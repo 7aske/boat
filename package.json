@@ -4,7 +4,7 @@
   "description": "",
   "main": "electron.js",
   "scripts": {
-    "start": "electron electron.js",
+    "start": "electron electron.js --url=https://youtube.com/tv",
     "build-linux": "electron-packager ./ boat --out=./build --platform=linux --arch=x64 --overwrite --ignore=./build --ignore=.idea --ignore=.eslintrc.json --ignore=.gitignore && sudo chmod 4755 ./build/boat-linux-x64/chrome-sandbox",
     "build-windows": "electron-packager ./ boat --out=./build --platform=win32 --arch=x64 --overwrite --ignore=./build --ignore=.idea --ignore=.eslintrc.json --ignore=.gitignore"
   },

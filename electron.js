@@ -1,6 +1,5 @@
 const {app, BrowserWindow, ipcMain, globalShortcut} = require("electron");
-
-const argv = require("yargs").argv;
+const argv = require("yargs").parse(process.argv.slice(1));
 
 let mainWindow = null;
 let urlWindow = null;
@@ -66,9 +65,12 @@ async function main() {
 		}
 	});
 	mainWindow.on("closed", app.exit);
+	console.log(argv, process.argv);
+	console.log(argv.url, argv._[0]);
 
+	const openUrl = addProtocol(argv.url || argv._[0] || "google.com");
 	try {
-		await mainWindow.loadURL(argv.url || argv._[0] || "");
+		await mainWindow.loadURL(openUrl);
 	} catch (e) {
 		mainWindow && await openUrlWindow();
 	}
@@ -95,14 +97,9 @@ ipcMain.on("page-ctl", (event, args) => {
 
 ipcMain.on("url-open", async (event, args) => {
 	if (mainWindow) {
-		const url = require("url");
-		const openUrl = url.format({
-			protocol: "http",
-			slashes: true,
-			pathname: args.url,
-		});
+		const openUrl = addProtocol(args.url);
 		console.log("opening: ", openUrl);
-		await mainWindow.loadURL(openUrl);
+		await mainWindow.loadURL(addProtocol(openUrl));
 		urlWindow && urlWindow.close();
 	}
 });
@@ -131,6 +128,12 @@ async function openUrlWindow() {
 	});
 }
 
+function addProtocol(link) {
+	if (link.search(/^http[s]?:\/\//) ===-1) {
+		link = 'http://' + link;
+	}
+	return link;
+}
 
 app.on("ready", main);
 app.on("window-all-closed", app.exit);
