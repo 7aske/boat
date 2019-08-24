@@ -41,6 +41,9 @@ async function main() {
 	globalShortcut.register("F5", () => {
 		mainWindow && mainWindow.webContents.reload();
 	});
+	globalShortcut.register("F11", () => {
+		mainWindow && mainWindow.setFullScreen(!mainWindow.isFullScreen());
+	});
 	globalShortcut.register("Alt+Left", () => {
 		mainWindow && mainWindow.webContents.canGoBack() && mainWindow.webContents.goBack();
 	});
@@ -129,8 +132,8 @@ async function openUrlWindow() {
 }
 
 function addProtocol(link) {
-	if (link.search(/^http[s]?:\/\//) ===-1) {
-		link = 'http://' + link;
+	if (link.search(/^http[s]?:\/\//) === -1) {
+		link = "http://" + link;
 	}
 	return link;
 }

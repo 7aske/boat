@@ -20,6 +20,7 @@ Opens `https://youtube.com/tv` in a borderless window.
 | **Shortcut**                       | **Description**                  |
 |------------------------------------|----------------------------------|
 | <kbd>F5</kbd>                      | Refresh page                     |
+| <kbd>F11</kbd>                     | Toggle fullscreen                |
 | <kbd>Cmd/Ctrl + L</kbd>            | Open address bar                 |
 | <kbd>Cmd/Ctrl + Alt + Up</kbd>     | Increase opacity                 |
 | <kbd>Cmd/Ctrl + Alt + Down</kbd>   | Decrease opacity                 |
