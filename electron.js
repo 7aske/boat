@@ -1,5 +1,14 @@
 const {app, BrowserWindow, ipcMain, globalShortcut} = require("electron");
-const argv = require("yargs").parse(process.argv.slice(1));
+const path = require("path");
+const argv = require("yargs")(process.argv.slice(1))
+	.default("url", "google.com")
+	.alias("url", "u")
+	.options("frame", {
+		default: true,
+		alias: "f",
+	})
+	.argv;
+console.log(process.argv.slice(1));
 
 let mainWindow = null;
 let urlWindow = null;
@@ -10,9 +19,12 @@ async function main() {
 		darkTheme: true,
 		autoHideMenuBar: true,
 		transparent: true,
-		opacity: 0.5,
+		opacity: 1,
 		title: "Boat",
+		icon: path.join(__dirname, "assets/icon.png"),
+		frame: argv["frame"],
 		backgroundColor: "black",
+		disableAutoHideCursor: false,
 		width: 1280,
 		height: 720,
 		webPreferences: {nodeIntegration: true},
@@ -41,6 +53,9 @@ async function main() {
 	globalShortcut.register("F5", () => {
 		mainWindow && mainWindow.webContents.reload();
 	});
+	globalShortcut.register("F10", () => {
+		mainWindow.hide;
+	});
 	globalShortcut.register("F11", () => {
 		mainWindow && mainWindow.setFullScreen(!mainWindow.isFullScreen());
 	});
@@ -50,6 +65,26 @@ async function main() {
 	globalShortcut.register("Alt+Right", () => {
 		mainWindow && mainWindow.webContents.canGoForward() && mainWindow.webContents.goForward();
 	});
+
+
+	globalShortcut.register("CmdOrCtrl+Shift+Right", () => {
+		mainWindow && mainWindow.setPosition(mainWindow.getPosition()[0] + 5, mainWindow.getPosition()[1]);
+	});
+
+	globalShortcut.register("CmdOrCtrl+Shift+Left", () => {
+		mainWindow && mainWindow.setPosition(mainWindow.getPosition()[0] - 5, mainWindow.getPosition()[1]);
+	});
+
+	globalShortcut.register("CmdOrCtrl+Shift+Up", () => {
+		console.log(mainWindow.getPosition());
+		mainWindow && mainWindow.setPosition(mainWindow.getPosition()[0], mainWindow.getPosition()[1] - 5);
+	});
+
+	globalShortcut.register("CmdOrCtrl+Shift+Down", () => {
+		mainWindow && mainWindow.setPosition(mainWindow.getPosition()[0], mainWindow.getPosition()[1] + 5);
+	});
+
+
 	globalShortcut.register("Escape", () => {
 		urlWindow && urlWindow.close();
 	});
