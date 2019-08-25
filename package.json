@@ -16,6 +16,7 @@
     "electron-packager": "^14.0.4"
   },
   "dependencies": {
+    "materialize-css": "^1.0.0",
     "yargs": "^14.0.0"
   }
 }

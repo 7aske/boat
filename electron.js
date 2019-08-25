@@ -9,7 +9,7 @@ const argv = require("yargs")(process.argv.slice(1))
 	})
 	.argv;
 console.log(process.argv.slice(1));
-
+let globalUrl = argv.url || argv._[0] || "google.com";
 
 const template = [
 	{
@@ -24,12 +24,12 @@ const template = [
 			{
 				label: "Enter URL",
 				accelerator: "CommandOrControl+L",
-				click: () => openUrlWindow(),
+				click: () => urlWindow && urlWindow.show(),
 			}, {
 				label: "Close URL",
 				visible: false,
 				accelerator: "Esc",
-				click: () => urlWindow && urlWindow.close(),
+				click: () => urlWindow && urlWindow.hide(),
 			},
 			{
 				label: "Reload",
@@ -185,17 +185,17 @@ async function main() {
 		}
 	});
 	mainWindow.on("closed", app.exit);
-	console.log(argv, process.argv);
-	console.log(argv.url, argv._[0]);
 
-	const openUrl = addProtocol(argv.url || argv._[0] || "google.com");
+	const openUrl = addProtocol(globalUrl);
 	try {
 		await mainWindow.loadURL(openUrl);
 	} catch (e) {
-		mainWindow && await openUrlWindow();
+		urlWindow && urlWindow.show();
+
 	}
 	mainWindow.show();
 	mainWindow.setMenu(menu);
+	await openUrlWindow();
 }
 
 ipcMain.on("page-ctl", (event, args) => {
@@ -210,18 +210,35 @@ ipcMain.on("page-ctl", (event, args) => {
 			case "reload":
 				mainWindow.webContents.reload();
 				break;
+			case "close":
+				app.quit();
+				break;
 		}
 	}
 });
-
 
 ipcMain.on("url-open", async (event, args) => {
 	if (mainWindow) {
 		const openUrl = addProtocol(args.url);
 		console.log("opening: ", openUrl);
+		globalUrl = args.url;
+		event.returnValue = addProtocol(openUrl);
 		await mainWindow.loadURL(addProtocol(openUrl));
-		urlWindow && urlWindow.close();
+		urlWindow && urlWindow.hide();
 	}
+});
+
+ipcMain.on("url-get", async (event, args) => {
+	event.returnValue = {"url": addProtocol(globalUrl)};
+});
+
+ipcMain.on("url_win-hide", async (event, args) => {
+	console.log(event);
+	urlWindow && urlWindow.hide();
+});
+
+ipcMain.on("url_win-show", async (event, args) => {
+	urlWindow && urlWindow.show();
 });
 
 async function openUrlWindow() {
@@ -242,11 +259,9 @@ async function openUrlWindow() {
 		webPreferences: {nodeIntegration: true},
 	});
 	await urlWindow.loadFile("views/urlWindow.html");
-	urlWindow.on("ready-to-show", urlWindow.show);
 	urlWindow.on("closed", () => urlWindow = null);
 	urlWindow.on("blur", () => {
-		urlWindow.close();
-		urlWindow = null;
+		urlWindow.hide();
 	});
 }
 

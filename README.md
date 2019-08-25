@@ -39,7 +39,7 @@ Opens `https://youtube.com/tv` in a borderless window
 
 There is not much to it. It just offers a convenient sleek window for multitasking.
 
-## Installation
+## Download
 
 You can always download pre-built packages in the [releases](https://github.com/7aske/boat/releases) section.
 
